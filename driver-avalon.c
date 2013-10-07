@@ -108,8 +108,57 @@ static int avalon_init_task(struct avalon_task *at,
 	buf[9] = 0x01;
 	buf[10] = 0x00;
 	buf[11] = 0x00;
-	lefreq16 = (uint16_t *)&buf[6];
-	*lefreq16 = htole16(frequency * 8);
+
+	if (frequency < 500) {
+		lefreq16 = (uint16_t *)&buf[6];
+		*lefreq16 = htole16(frequency * 8);
+	}
+	switch (frequency) {
+	case 500:
+		buf[6] = 0xe0;
+		buf[7] = 0x94;
+		break;
+	case 550:
+		buf[6] = 0xa0;
+		buf[7] = 0x82;
+		break;
+	case 600:
+		buf[6] = 0xe0;
+		buf[7] = 0x82;
+		break;
+	case 650:
+		buf[6] = 0x20;
+		buf[7] = 0x83;
+		break;
+	case 700:
+		buf[6] = 0x60;
+		buf[7] = 0x83;
+		break;
+	case 750:
+		buf[6] = 0xa0;
+		buf[7] = 0x83;
+		break;
+	case 800:
+		buf[6] = 0xe0;
+		buf[7] = 0x83;
+		break;
+	case 850:
+		buf[6] = 0x20;
+		buf[7] = 0x84;
+		break;
+	case 900:
+		buf[6] = 0x60;
+		buf[7] = 0x84;
+		break;
+	case 950:
+		buf[6] = 0xa0;
+		buf[7] = 0x84;
+		break;
+	case 1000:
+		buf[6] = 0xe0;
+		buf[7] = 0x84;
+		break;
+	}
 
 	return 0;
 }
@@ -1062,7 +1111,7 @@ static void *avalon_send_tasks(void *userdata)
 		avalon_adjust_freq(info, avalon);
 
 		/* A full nonce range */
-		us_timeout = 0x100000000ll / info->asic_count / info->frequency;
+		us_timeout = 0x100000000ll / info->asic_count / info->frequency / 2;
 		cgsleep_prepare_r(&ts_start);
 
 		mutex_lock(&info->qlock);
